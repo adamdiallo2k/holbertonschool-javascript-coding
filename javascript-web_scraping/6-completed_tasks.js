@@ -1,31 +1,22 @@
 #!/usr/bin/node
-
 const request = require('request');
+const url = process.argv[2]; // url to request
 
-// Get the API URL from the command line arguments
-const apiUrl = process.argv[2];
-
-// Make a GET request to the provided API URL
-request.get(apiUrl, (error, response, body) => {
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const tasks = JSON.parse(body);
-  const completedTasksByUser = {};
-
-  tasks.forEach(task => {
-    if (task.completed) {
-      if (completedTasksByUser[task.userId]) {
-        completedTasksByUser[task.userId]++;
-      } else {
-        completedTasksByUser[task.userId] = 1;
+request(url, function (err, response, body) {
+  if (err) {
+    console.log(err);
+  } else {
+    const tasks = {};
+    const json = JSON.parse(body);
+    for (const task of json) {
+      if (task.completed === true) {
+        if (tasks[task.userId] === undefined) {
+          tasks[task.userId] = 1;
+        } else {
+          tasks[task.userId] += 1;
+        }
       }
     }
-  });
-
-  for (const userId in completedTasksByUser) {
-    console.log(`${userId}: ${completedTasksByUser[userId]}`);
+    console.log(tasks);
   }
 });
